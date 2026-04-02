@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Impostos</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --panel-2: #f8fbff;
+      --text: #162033;
+      --muted: #5f6f86;
+      --line: #dbe5f0;
+      --accent: #2f6fed;
+      --accent-soft: #eaf2ff;
+      --danger: #c94b4b;
+      --ok: #2b8a57;
+      --shadow: 0 18px 50px rgba(17, 24, 39, .08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(47,111,237,.08), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(47,111,237,.05), transparent 25%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .hero {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(1.9rem, 2.7vw, 3rem);
+      line-height: 1.04;
+      letter-spacing: -0.03em;
+      color: #101828;
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      max-width: 860px;
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.08fr .92fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.94));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card .inner { padding: 22px; }
+
+    .section-title {
+      font-size: .88rem;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: var(--muted);
+      margin: 0 0 14px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: .92rem;
+      color: var(--muted);
+    }
+
+    input, select, button {
+      font: inherit;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .18s ease, transform .08s ease, box-shadow .18s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(47,111,237,.10);
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .row > * { flex: 1; }
+
+    .tax-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .tax-item {
+      background: #fbfdff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1.4fr .8fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform .08s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      background: #f7fbff;
+      box-shadow: 0 6px 18px rgba(47,111,237,.08);
+    }
+
+    .btn:active { transform: translateY(1px); }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #f2f7ff, #e7f0ff);
+      border-color: rgba(47,111,237,.35);
+      color: #1849a9;
+      font-weight: 600;
+    }
+
+    .btn-danger {
+      color: var(--danger);
+      border-color: rgba(201,75,75,.25);
+      background: #fff7f7;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      background: #fbfdff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .stat small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.45rem;
+      letter-spacing: -.03em;
+      color: #0f1728;
+    }
+
+    .chart-card {
+      background: linear-gradient(180deg, #fbfdff, #f6faff);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 100%;
+    }
+
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .chart-wrap canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .chart-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .chart-center .mini {
+      font-size: .8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    .chart-center strong {
+      font-size: 1.35rem;
+      letter-spacing: -.03em;
+      color: #0f1728;
+      margin-top: 6px;
+    }
+
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: .93rem;
+      color: var(--text);
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.75);
+    }
+
+    .legend-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      border: 1px solid rgba(0,0,0,.05);
+    }
+
+    .breakdown {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .breakdown table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .breakdown th,
+    .breakdown td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    .breakdown th {
+      color: var(--muted);
+      font-weight: 600;
+      background: #f8fbff;
+    }
+
+    .breakdown tr:last-child td { border-bottom: none; }
+
+    .hint {
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.55;
+      margin-top: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.82);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: .84rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .muted { color: var(--muted); }
+
+    @media (max-width: 1040px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .wrap { padding: 16px; }
+      .controls { grid-template-columns: 1fr; }
+      .tax-item { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr; }
+      .hero { flex-direction: column; align-items: start; }
+      .row { flex-direction: column; align-items: stretch; }
+      .chart-wrap { max-width: 240px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <span class="badge">Aplicação web · motor tributário paramétrico</span>
+        <h1>Calculadora de Impostos</h1>
+        <p>Solução tecnológica de simulação tributária desenvolvida para estimar carga fiscal incidente sobre valores de referência, permitindo cálculo automatizado de bruto, líquido, composição por tributo e visualização analítica da distribuição percentual. O sistema opera em modelo configurável, com presets rápidos, edição manual de alíquotas e persistência local para uso recorrente em rotinas comerciais, financeiras e operacionais.</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <div class="inner">
+          <h2 class="section-title">Configuração</h2>
+
+          <div class="controls">
+            <div class="field">
+              <label for="mode">Modo de cálculo</label>
+              <select id="mode">
+                <option value="grossToNet">Valor bruto → valor líquido</option>
+                <option value="netToGross">Valor líquido desejado → valor bruto necessário</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="preset">Preset rápido</label>
+              <select id="preset">
+                <option value="custom">Personalizado</option>
+                <option value="freelancer">Freelancer (ISS + IR estimado)</option>
+                <option value="serviceLight">Serviço leve (ISS + PIS + COFINS)</option>
+                <option value="commerce">Comércio básico (ICMS + PIS + COFINS)</option>
+              </select>
+            </div>
+
+            <div class="field" style="grid-column: 1 / -1;">
+              <label for="amount">Valor base (R$)</label>
+              <input id="amount" type="number" min="0" step="0.01" value="1000" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="newTaxName">Novo tributo</label>
+              <input id="newTaxName" type="text" placeholder="Ex.: ISS" />
+            </div>
+            <div class="field">
+              <label for="newTaxRate">Alíquota (%)</label>
+              <input id="newTaxRate" type="number" min="0" step="0.01" placeholder="Ex.: 5" />
+            </div>
+            <button class="btn btn-primary" id="addTaxBtn">Adicionar</button>
+          </div>
+
+          <div class="tax-list" id="taxList"></div>
+
+          <div class="toolbar">
+            <button class="btn btn-primary" id="calculateBtn">Calcular</button>
+            <button class="btn" id="resetBtn">Resetar</button>
+            <button class="btn" id="copyBtn">Copiar resumo</button>
+          </div>
+
+          <p class="hint">Ferramenta de simulação. Não substitui enquadramento tributário, apuração contábil, validação fiscal nem parecer profissional.</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="inner">
+          <h2 class="section-title">Resultado</h2>
+
+          <div class="result-grid">
+            <div>
+              <div class="stats">
+                <div class="stat">
+                  <small>Valor informado</small>
+                  <strong id="inputValue">R$ 0,00</strong>
+                </div>
+                <div class="stat">
+                  <small>Carga tributária total</small>
+                  <strong id="effectiveRate">0,00%</strong>
+                </div>
+                <div class="stat">
+                  <small>Valor líquido</small>
+                  <strong id="netValue">R$ 0,00</strong>
+                </div>
+                <div class="stat">
+                  <small>Valor bruto</small>
+                  <strong id="grossValue">R$ 0,00</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-wrap">
+                <canvas id="donutChart" width="320" height="320" aria-label="Distribuição tributária"></canvas>
+                <div class="chart-center">
+                  <div class="mini">Total dos tributos</div>
+                  <strong id="chartCenterValue">R$ 0,00</strong>
+                </div>
+              </div>
+              <div class="legend" id="chartLegend"></div>
+            </div>
+          </div>
+
+          <div class="breakdown">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tributo</th>
+                  <th>Alíquota</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody id="breakdownBody">
+                <tr>
+                  <td colspan="3" class="muted">Nenhum cálculo realizado.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="hint" id="summaryText">Insira o valor base, defina as alíquotas e execute o cálculo.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const DIGITS = 2;
+    const CHART_COLORS = ['#2f6fed', '#6c8ff5', '#92adff', '#5ec5a7', '#ffb454', '#f97373', '#8b7cf6', '#32b5d2', '#9ccf4f', '#e879f9'];
+
+    const presets = {
+      custom: [],
+      freelancer: [
+        { name: 'ISS', rate: 5 },
+        { name: 'IR estimado', rate: 15 }
+      ],
+      serviceLight: [
+        { name: 'ISS', rate: 5 },
+        { name: 'PIS', rate: 0.65 },
+        { name: 'COFINS', rate: 3 }
+      ],
+      commerce: [
+        { name: 'ICMS', rate: 18 },
+        { name: 'PIS', rate: 1.65 },
+        { name: 'COFINS', rate: 7.6 }
+      ]
+    };
+
+    const state = {
+      taxes: loadTaxes() || [
+        { id: crypto.randomUUID(), name: 'ISS', rate: 5 },
+        { id: crypto.randomUUID(), name: 'PIS', rate: 0.65 },
+        { id: crypto.randomUUID(), name: 'COFINS', rate: 3 }
+      ],
+      lastTaxBreakdown: []
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const taxList = $('taxList');
+    const breakdownBody = $('breakdownBody');
+    const chartLegend = $('chartLegend');
+    const donutCanvas = $('donutChart');
+    const donutCtx = donutCanvas.getContext('2d');
+
+    function brl(value) {
+      return Number(value).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        minimumFractionDigits: DIGITS,
+        maximumFractionDigits: DIGITS,
+      });
+    }
+
+    function pct(value, digits = 2) {
+      return `${Number(value).toLocaleString('pt-BR', {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      })}%`;
+    }
+
+    function round(value) {
+      const factor = Math.pow(10, DIGITS);
+      return Math.round((Number(value) + Number.EPSILON) * factor) / factor;
+    }
+
+    function saveTaxes() {
+      localStorage.setItem('taxCalculatorTaxes', JSON.stringify(state.taxes));
+    }
+
+    function loadTaxes() {
+      try {
+        const raw = localStorage.getItem('taxCalculatorTaxes');
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed)
+          ? parsed.map(t => ({ id: t.id || crypto.randomUUID(), name: t.name, rate: Number(t.rate) || 0 }))
+          : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function renderTaxes() {
+      taxList.innerHTML = '';
+
+      if (!state.taxes.length) {
+        taxList.innerHTML = '<div class="muted">Nenhum tributo cadastrado.</div>';
+        return;
+      }
+
+      state.taxes.forEach((tax) => {
+        const item = document.createElement('div');
+        item.className = 'tax-item';
+        item.innerHTML = `
+          <input type="text" value="${escapeHtml(tax.name)}" aria-label="Nome do tributo" />
+          <input type="number" min="0" step="0.01" value="${Number(tax.rate)}" aria-label="Alíquota" />
+          <button class="btn btn-danger" type="button">Remover</button>
+        `;
+
+        const [nameInput, rateInput, removeBtn] = item.children;
+
+        nameInput.addEventListener('input', (e) => {
+          tax.name = e.target.value;
+          saveTaxes();
+        });
+
+        rateInput.addEventListener('input', (e) => {
+          tax.rate = Number(e.target.value) || 0;
+          saveTaxes();
+        });
+
+        removeBtn.addEventListener('click', () => {
+          state.taxes = state.taxes.filter(t => t.id !== tax.id);
+          saveTaxes();
+          renderTaxes();
+          calculate();
+        });
+
+        taxList.appendChild(item);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function totalRate() {
+      return state.taxes.reduce((acc, tax) => acc + (Number(tax.rate) || 0), 0);
+    }
+
+    function drawDonutChart(items, total) {
+      const ctx = donutCtx;
+      const canvas = donutCanvas;
+      const dpr = window.devicePixelRatio || 1;
+      const displaySize = 320;
+      canvas.width = displaySize * dpr;
+      canvas.height = displaySize * dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, displaySize, displaySize);
+
+      const cx = displaySize / 2;
+      const cy = displaySize / 2;
+      const radius = 108;
+      const lineWidth = 40;
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = '#e9eff7';
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = 'butt';
+      ctx.stroke();
+
+      if (!items.length || total <= 0) {
+        chartLegend.innerHTML = '<div class="muted">Nenhuma composição tributária para exibir.</div>';
+        $('chartCenterValue').textContent = brl(0);
+        return;
+      }
+
+      let startAngle = -Math.PI / 2;
+      chartLegend.innerHTML = '';
+
+      items.forEach((item, index) => {
+        const fraction = item.value / total;
+        const endAngle = startAngle + (Math.PI * 2 * fraction);
+        const color = CHART_COLORS[index % CHART_COLORS.length];
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, startAngle, endAngle);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.lineCap = 'butt';
+        ctx.stroke();
+
+        startAngle = endAngle;
+
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
+        legendItem.innerHTML = `
+          <div class="legend-left">
+            <span class="dot" style="background:${color}"></span>
+            <span>${escapeHtml(item.name)}</span>
+          </div>
+          <strong>${pct((item.value / total) * 100, 2)}</strong>
+        `;
+        chartLegend.appendChild(legendItem);
+      });
+
+      $('chartCenterValue').textContent = brl(total);
+    }
+
+    function calculate() {
+      const amount = Number($('amount').value) || 0;
+      const mode = $('mode').value;
+      const rateSum = totalRate();
+      const rateFactor = rateSum / 100;
+
+      let gross = 0;
+      let net = 0;
+      let taxBase = 0;
+
+      if (mode === 'grossToNet') {
+        gross = amount;
+        net = gross * (1 - rateFactor);
+        taxBase = gross;
+      } else {
+        net = amount;
+        gross = rateFactor >= 1 ? 0 : net / (1 - rateFactor);
+        taxBase = gross;
+      }
+
+      gross = round(gross);
+      net = round(net);
+
+      $('inputValue').textContent = brl(amount);
+      $('effectiveRate').textContent = pct(rateSum, 2);
+      $('netValue').textContent = brl(net);
+      $('grossValue').textContent = brl(gross);
+
+      breakdownBody.innerHTML = '';
+      state.lastTaxBreakdown = [];
+
+      if (!state.taxes.length) {
+        breakdownBody.innerHTML = '<tr><td colspan="3" class="muted">Nenhum tributo cadastrado.</td></tr>';
+      } else {
+        state.taxes.forEach((tax) => {
+          const taxValue = round(taxBase * ((Number(tax.rate) || 0) / 100));
+          state.lastTaxBreakdown.push({ name: tax.name || '—', rate: Number(tax.rate) || 0, value: taxValue });
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${escapeHtml(tax.name || '—')}</td>
+            <td>${pct(Number(tax.rate) || 0, 2)}</td>
+            <td>${brl(taxValue)}</td>
+          `;
+          breakdownBody.appendChild(tr);
+        });
+      }
+
+      const totalTaxesValue = round(state.lastTaxBreakdown.reduce((sum, item) => sum + item.value, 0));
+      drawDonutChart(state.lastTaxBreakdown.filter(item => item.value > 0), totalTaxesValue);
+
+      let note = '';
+      if (mode === 'grossToNet') {
+        note = `Partindo de ${brl(amount)}, a carga total de ${pct(rateSum, 2)} produz valor líquido estimado de ${brl(net)} e tributos agregados de ${brl(totalTaxesValue)}.`;
+      } else {
+        if (rateFactor >= 1) {
+          note = 'A soma das alíquotas atingiu ou superou 100%, tornando o cálculo inviável neste modo.';
+        } else {
+          note = `Para obter ${brl(amount)} líquidos, o valor bruto estimado é ${brl(gross)}, com carga total de ${pct(rateSum, 2)} e tributos agregados de ${brl(totalTaxesValue)}.`;
+        }
+      }
+
+      $('summaryText').textContent = note;
+    }
+
+    $('addTaxBtn').addEventListener('click', () => {
+      const name = $('newTaxName').value.trim();
+      const rate = Number($('newTaxRate').value);
+      if (!name) return;
+
+      state.taxes.push({
+        id: crypto.randomUUID(),
+        name,
+        rate: Number.isFinite(rate) ? rate : 0
+      });
+
+      $('newTaxName').value = '';
+      $('newTaxRate').value = '';
+      saveTaxes();
+      renderTaxes();
+      calculate();
+    });
+
+    $('preset').addEventListener('change', (e) => {
+      const preset = e.target.value;
+      if (preset === 'custom') return;
+      state.taxes = presets[preset].map(t => ({ ...t, id: crypto.randomUUID() }));
+      saveTaxes();
+      renderTaxes();
+      calculate();
+    });
+
+    $('calculateBtn').addEventListener('click', calculate);
+    $('mode').addEventListener('change', calculate);
+    $('amount').addEventListener('input', calculate);
+    window.addEventListener('resize', calculate);
+
+    $('resetBtn').addEventListener('click', () => {
+      $('mode').value = 'grossToNet';
+      $('preset').value = 'custom';
+      $('amount').value = '1000';
+      state.taxes = [
+        { id: crypto.randomUUID(), name: 'ISS', rate: 5 },
+        { id: crypto.randomUUID(), name: 'PIS', rate: 0.65 },
+        { id: crypto.randomUUID(), name: 'COFINS', rate: 3 }
+      ];
+      saveTaxes();
+      renderTaxes();
+      calculate();
+    });
+
+    $('copyBtn').addEventListener('click', async () => {
+      const lines = [
+        `Modo: ${$('mode').selectedOptions[0].text}`,
+        `Valor informado: ${$('inputValue').textContent}`,
+        `Carga tributária total: ${$('effectiveRate').textContent}`,
+        `Valor líquido: ${$('netValue').textContent}`,
+        `Valor bruto: ${$('grossValue').textContent}`,
+        `Tributos: ${state.taxes.map(t => `${t.name} (${String(t.rate).replace('.', ',')}%)`).join('; ')}`,
+      ];
+      try {
+        await navigator.clipboard.writeText(lines.join('\n'));
+        const btn = $('copyBtn');
+        const original = btn.textContent;
+        btn.textContent = 'Resumo copiado';
+        setTimeout(() => btn.textContent = original, 1400);
+      } catch {
+        alert('Não foi possível copiar automaticamente.');
+      }
+    });
+
+    renderTaxes();
+    calculate();
+  </script>
+</body>
+</html>
