@@ -1,127 +1,406 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="pt-BR">
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Button Border Effect</title>
-	<style>
-		* {
-			margin: 0;
-			padding: 0;
-		}
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>L337 Tools</title>
+  <style>
+    :root {
+      --bg: #212121;
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.52);
+      --line: rgba(255,255,255,.18);
+      --line-strong: rgba(255,255,255,.75);
+      --panel: rgba(255,255,255,.055);
+      --glow: rgba(255,255,255,.12);
+      --btn-size: 118px;
+      --orbit-radius: 150px;
+      --orbit-speed: 16s;
+    }
 
-		body {
-			background-color: #212121
-		}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-		section {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			width: 100%;
-			height: 100vh;
-		}
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
 
-		button {
-			font-size: 20px;
-			padding: 10px 20px;
-			border: none;
-			position: relative;
-			background-color: transparent;
-			color: #212121;
-			transition: 0.22s all ease-in-out;
-			cursor: pointer;
-		}
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,.05), transparent 22%),
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.03), transparent 38%),
+        var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
 
-		button::before {
-			position: absolute;
-			content: '';
-			border-top: #212121 solid 3px;
-			border-left: #212121 solid 3px;
-			width: 10%;
-			height: 30%;
-			top: -3px;
-			left: -3px;
-			transition: 0.17s all ease-in-out;
-		}
+    .cursor {
+      position: fixed;
+      width: 7px;
+      height: 7px;
+      background: #f0f0f0d0;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform .55s;
+    }
 
-		button::after {
-			position: absolute;
-			content: '';
-			border-bottom: #212121 solid 3px;
-			border-right: #212121 solid 3px;
-			width: 10%;
-			height: 30%;
-			bottom: -3px;
-			right: -3px;
-			transition: 0.45s all ease-in-out;
-		}
+    .cursor-ring {
+      position: fixed;
+      width: 33px;
+      height: 33px;
+      border: 1px solid rgba(255,255,255,.199);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%) scale(1);
+      transition: all .95s ease;
+    }
 
-		button:hover {
-			color: #ebebebe6;
-			transition: all;
-		}
+    main {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      position: relative;
+      isolation: isolate;
+    }
 
-		button:hover::before,
-		button:hover::after {
-			width: 100%;
-			height: 100%;
-			border-color: #ffffff;
-			transition: 1.7s;
-		}
+    .hub {
+      position: relative;
+      width: min(72vw, 620px);
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+    }
 
-		/* ── CURSOR ── */
-		.cursor {
-			position: fixed;
-			width: 7px;
-			height: 7px;
-			background: #f0f0f0d0;
-			border-radius: 50%;
-			pointer-events: none;
-			z-index: 9999;
-			transform: translate(-50%, -50%);
-			transition: transform .55s;
-		}
+    .hub::before,
+    .hub::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      inset: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      opacity: .55;
+    }
 
-		.cursor-ring {
-			position: fixed;
-			width: 33px;
-			height: 33px;
-			border: 1px solid rgba(255, 255, 255, 0.199);
-			border-radius: 50%;
-			pointer-events: none;
-			z-index: 9998;
-			transform: translate(-50%, -50%);
-			transition: all 0.95s ease;
-		}
-	</style>
+    .hub::before {
+      width: 180px;
+      height: 180px;
+      border: 1px solid rgba(255,255,255,.06);
+      box-shadow: 0 0 60px rgba(255,255,255,.05) inset;
+    }
+
+    .hub::after {
+      width: 320px;
+      height: 320px;
+      border: 1px dashed rgba(255,255,255,.05);
+    }
+
+    .core-wrap {
+      position: absolute;
+      inset: 50%;
+      width: var(--btn-size);
+      height: var(--btn-size);
+      transform: translate(-50%, -50%);
+      z-index: 4;
+    }
+
+    .core {
+      width: 100%;
+      height: 100%;
+      border: none;
+      position: relative;
+      background: transparent;
+      color: var(--text);
+      letter-spacing: .22em;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+      border-radius: 50%;
+      transition: color .22s ease, transform .35s ease, background .35s ease;
+    }
+
+    .core::before,
+    .core::after {
+      position: absolute;
+      content: '';
+      width: 18%;
+      height: 30%;
+      transition: .35s all ease-in-out;
+    }
+
+    .core::before {
+      border-top: 2px solid rgba(255,255,255,.72);
+      border-left: 2px solid rgba(255,255,255,.72);
+      top: 6px;
+      left: 6px;
+      border-top-left-radius: 24px;
+    }
+
+    .core::after {
+      border-bottom: 2px solid rgba(255,255,255,.72);
+      border-right: 2px solid rgba(255,255,255,.72);
+      bottom: 6px;
+      right: 6px;
+      border-bottom-right-radius: 24px;
+    }
+
+    .core:hover,
+    .hub.active .core {
+      color: #ffffff;
+      transform: scale(1.035);
+      background: radial-gradient(circle at center, rgba(255,255,255,.07), rgba(255,255,255,.015));
+    }
+
+    .core:hover::before,
+    .core:hover::after,
+    .hub.active .core::before,
+    .hub.active .core::after {
+      width: calc(100% - 12px);
+      height: calc(100% - 12px);
+      border-color: var(--line-strong);
+    }
+
+    .orbit-layer {
+      position: absolute;
+      inset: 50%;
+      width: 0;
+      height: 0;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .45s ease;
+    }
+
+    .hub.active .orbit-layer {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .tool-orbit {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 0;
+      animation: orbit-spin var(--orbit-speed) linear infinite;
+      animation-play-state: paused;
+    }
+
+    .hub.active .tool-orbit {
+      animation-play-state: running;
+    }
+
+    .tool-link {
+      --size: 152px;
+      position: absolute;
+      left: calc(var(--orbit-radius) * -1);
+      top: calc(var(--size) / -2);
+      width: var(--size);
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.035));
+      border: 1px solid var(--line);
+      box-shadow: 0 10px 30px rgba(0,0,0,.2), 0 0 0 1px rgba(255,255,255,.02) inset;
+      backdrop-filter: blur(8px);
+      transform: translate(0, 0) scale(.2);
+      opacity: 0;
+      filter: blur(8px);
+      pointer-events: none;
+      white-space: nowrap;
+      transition:
+        transform .85s cubic-bezier(.2,.9,.15,1.15),
+        opacity .55s ease,
+        filter .55s ease,
+        border-color .25s ease,
+        box-shadow .25s ease,
+        background .25s ease;
+    }
+
+    .tool-link::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 0 18px rgba(255,255,255,.35);
+      flex: 0 0 auto;
+    }
+
+    .hub.active .tool-link {
+      opacity: 1;
+      filter: blur(0);
+      pointer-events: auto;
+      transform: translate(calc(var(--orbit-radius) * -1), 0) scale(1);
+    }
+
+    .hub.closing .tool-link {
+      opacity: 0;
+      filter: blur(8px);
+      pointer-events: none;
+      transform: translate(0, 0) scale(.2);
+    }
+
+    .tool-link:hover {
+      border-color: rgba(255,255,255,.5);
+      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+      box-shadow: 0 12px 36px rgba(0,0,0,.28), 0 0 24px rgba(255,255,255,.08);
+    }
+
+    .tool-label {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+    }
+
+    .tool-label strong {
+      font-size: .92rem;
+      font-weight: 600;
+      letter-spacing: .01em;
+    }
+
+    .tool-label span {
+      font-size: .66rem;
+      color: var(--muted);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+
+    .helper {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      font-size: .76rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    @keyframes orbit-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 700px) {
+      :root {
+        --btn-size: 104px;
+        --orbit-radius: 118px;
+      }
+
+      .tool-link {
+        --size: 136px;
+      }
+
+      .hub::after {
+        width: 260px;
+        height: 260px;
+      }
+
+      .helper {
+        width: calc(100% - 32px);
+        letter-spacing: .11em;
+      }
+    }
+  </style>
 </head>
-
 <body>
-	<div class="cursor" id="cursor"></div>
-	<div class="cursor-ring" id="cursorRing"></div>
-	<script>
-		// Custom cursor
-		const cursor = document.getElementById('cursor');
-		const ring = document.getElementById('cursorRing');
-		document.addEventListener('mousemove', e => {
-			cursor.style.left = e.clientX + 'px';
-			cursor.style.top = e.clientY + 'px';
-			setTimeout(() => {
-				ring.style.left = e.clientX + 'px';
-				ring.style.top = e.clientY + 'px';
-			}, 80);
-		});
-		document.querySelectorAll('a,button').forEach(el => {
-			el.addEventListener('mouseenter', () => ring.style.transform = 'translate(-50%,-50%) scale(1.8)');
-			el.addEventListener('mouseleave', () => ring.style.transform = 'translate(-50%,-50%) scale(1)');
-		});
-	</script>
-	<section>
-		<button>L337</button>
-	</section>
-</body>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
 
+  <main>
+    <section class="hub" id="hub" aria-label="L337 Tools hub">
+      <div class="orbit-layer" aria-hidden="false">
+        <div class="tool-orbit">
+          <a class="tool-link" href="calculadora_impostos_web.html">
+            <span class="tool-label">
+              <strong>Calculadora</strong>
+              <span>Impostos</span>
+            </span>
+          </a>
+        </div>
+      </div>
+
+      <div class="core-wrap">
+        <button class="core" id="coreButton" type="button" aria-label="L337">L337</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="helper">Passe o cursor sobre L337 para expandir as ferramentas</div>
+
+  <script>
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    const hub = document.getElementById('hub');
+    const coreButton = document.getElementById('coreButton');
+
+    let closeTimer = null;
+
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+      setTimeout(() => {
+        ring.style.left = e.clientX + 'px';
+        ring.style.top = e.clientY + 'px';
+      }, 80);
+    });
+
+    function scaleCursor(state) {
+      ring.style.transform = state
+        ? 'translate(-50%,-50%) scale(1.8)'
+        : 'translate(-50%,-50%) scale(1)';
+    }
+
+    function openOrbit() {
+      hub.classList.remove('closing');
+      hub.classList.add('active');
+      clearTimeout(closeTimer);
+      closeTimer = setTimeout(closeOrbit, 10000);
+    }
+
+    function closeOrbit() {
+      hub.classList.add('closing');
+      hub.classList.remove('active');
+      clearTimeout(closeTimer);
+      setTimeout(() => hub.classList.remove('closing'), 900);
+    }
+
+    coreButton.addEventListener('mouseenter', () => {
+      scaleCursor(true);
+      openOrbit();
+    });
+
+    coreButton.addEventListener('mouseleave', () => {
+      scaleCursor(false);
+    });
+
+    hub.querySelectorAll('a, button').forEach((el) => {
+      el.addEventListener('mouseenter', () => scaleCursor(true));
+      el.addEventListener('mouseleave', () => scaleCursor(false));
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) closeOrbit();
+    });
+  </script>
+</body>
 </html>
