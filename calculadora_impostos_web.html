@@ -8,7 +8,7 @@
   <title>Calculadora de Impostos Online | Simulador Tributário em Tempo Real</title>
   <meta name="description" content="Calcule impostos online em segundos. Simule valor bruto, valor líquido, carga tributária total e distribuição por tributo com presets rápidos e edição manual de alíquotas." />
   <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
-  <meta name="author" content="L337 Tools" />
+  <meta name="author" content="Calculadora de Impostos" />
   <meta name="theme-color" content="#f4f7fb" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="pt_BR" />
@@ -69,10 +69,7 @@
     }
 
     .hero {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 18px;
+      display: block;
       margin-bottom: 22px;
     }
 
@@ -87,7 +84,7 @@
     .hero p {
       margin: 10px 0 0;
       color: var(--muted);
-      max-width: 860px;
+      max-width: 100%;
       line-height: 1.6;
       font-size: 1rem;
     }
@@ -96,6 +93,7 @@
       display: grid;
       grid-template-columns: 1.08fr .92fr;
       gap: 20px;
+      align-items: stretch;
     }
 
     .card {
@@ -104,10 +102,14 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow: hidden;
+      height: 100%;
     }
 
     .card .inner {
       padding: 22px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     .section-title {
@@ -232,7 +234,18 @@
       display: grid;
       grid-template-columns: minmax(0, 1fr) 420px;
       gap: 20px;
-      align-items: stretch;
+      align-items: start;
+    }
+
+    .result-main {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .summary-block {
+      margin-top: auto;
     }
 
     .stats {
@@ -423,10 +436,6 @@
       }
     }
 
-    .result-grid {
-      grid-template-columns: 1fr;
-    }
-
     @media (max-width: 640px) {
       .wrap {
         padding: 16px;
@@ -444,10 +453,6 @@
         grid-template-columns: 1fr;
       }
 
-      .hero {
-        flex-direction: column;
-        align-items: start;
-      }
 
       .row {
         flex-direction: column;
@@ -486,7 +491,6 @@
     <meta itemprop="inLanguage" content="pt-BR" />
     <meta itemprop="name" content="Calculadora de Impostos" />
     <meta itemprop="description" content="Ferramenta online para simular carga tributária, calcular valor bruto e líquido e visualizar a composição dos tributos." />
-    <div class="wrap">
     <div class="hero">
       <div>
         <span class="badge">&nbsp; - <span style="font-weight:700; font-size:13pt;">CALCULADORA DE IMPOSTOS</span> -
@@ -560,62 +564,66 @@
         <div class="inner">
           <h2 class="section-title" id="resultTitle">Resultado</h2>
 
-          <div class="result-grid">
-            <div>
-              <div class="stats">
-                <div class="stat">
-                  <small>Valor informado</small>
-                  <strong id="inputValue">R$ 0,00</strong>
+          <div class="result-main">
+            <div class="result-grid">
+              <div>
+                <div class="stats">
+                  <div class="stat">
+                    <small>Valor informado</small>
+                    <strong id="inputValue">R$ 0,00</strong>
+                  </div>
+                  <div class="stat">
+                    <small>Carga tributária total</small>
+                    <strong id="effectiveRate">0,00%</strong>
+                  </div>
+                  <div class="stat">
+                    <small>Valor líquido</small>
+                    <strong id="netValue">R$ 0,00</strong>
+                  </div>
+                  <div class="stat">
+                    <small>Valor bruto</small>
+                    <strong id="grossValue">R$ 0,00</strong>
+                  </div>
                 </div>
-                <div class="stat">
-                  <small>Carga tributária total</small>
-                  <strong id="effectiveRate">0,00%</strong>
+              </div>
+
+              <div class="chart-card">
+                <div class="chart-wrap">
+                  <canvas id="donutChart" width="320" height="320" role="img" aria-label="Gráfico de rosca com a distribuição tributária calculada"></canvas>
+                  <div class="chart-center">
+                    <div class="mini">Total dos tributos</div>
+                    <strong id="chartCenterValue">R$ 0,00</strong>
+                  </div>
                 </div>
-                <div class="stat">
-                  <small>Valor líquido</small>
-                  <strong id="netValue">R$ 0,00</strong>
-                </div>
-                <div class="stat">
-                  <small>Valor bruto</small>
-                  <strong id="grossValue">R$ 0,00</strong>
-                </div>
+                <div class="legend" id="chartLegend"></div>
               </div>
             </div>
 
-            <div class="chart-card">
-              <div class="chart-wrap">
-                <canvas id="donutChart" width="320" height="320" role="img" aria-label="Gráfico de rosca com a distribuição tributária calculada"></canvas>
-                <div class="chart-center">
-                  <div class="mini">Total dos tributos</div>
-                  <strong id="chartCenterValue">R$ 0,00</strong>
-                </div>
+            <div class="summary-block">
+              <div class="breakdown">
+                <table aria-describedby="summaryText">
+                  <thead>
+                    <tr>
+                      <th>Tributo</th>
+                      <th>Alíquota</th>
+                      <th>Valor</th>
+                    </tr>
+                  </thead>
+                  <tbody id="breakdownBody">
+                    <tr>
+                      <td colspan="3" class="muted">Nenhum cálculo realizado.</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-              <div class="legend" id="chartLegend"></div>
+
+              <p class="hint" id="summaryText">Insira o valor base, defina as alíquotas e execute o cálculo.</p>
             </div>
           </div>
-
-          <div class="breakdown">
-            <table aria-describedby="summaryText">
-              <thead>
-                <tr>
-                  <th>Tributo</th>
-                  <th>Alíquota</th>
-                  <th>Valor</th>
-                </tr>
-              </thead>
-              <tbody id="breakdownBody">
-                <tr>
-                  <td colspan="3" class="muted">Nenhum cálculo realizado.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <p class="hint" id="summaryText">Insira o valor base, defina as alíquotas e execute o cálculo.</p>
         </div>
       </section>
     </div>
-  </div>
+  </main>
 
   <script>
     (function () {
@@ -967,7 +975,6 @@
     <img src="https://hitwebcounter.com/counter/counter.php?page=21486281&style=0007&nbdigits=8&type=page&initCount=29"
       border="0" />
   </a>
-  </main>
 
   <script type="application/ld+json">
   {
