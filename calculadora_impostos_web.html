@@ -230,9 +230,13 @@
       margin-top: 14px;
     }
 
+    .left-summary {
+      margin-top: 18px;
+    }
+
     .result-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 420px;
+      grid-template-columns: 1fr;
       gap: 20px;
       align-items: start;
     }
@@ -242,10 +246,6 @@
       flex-direction: column;
       flex: 1;
       min-height: 0;
-    }
-
-    .summary-block {
-      margin-top: auto;
     }
 
     .stats {
@@ -286,7 +286,7 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      min-height: 100%;
+      width: 100%;
     }
 
     .chart-wrap {
@@ -555,6 +555,27 @@
             <button class="btn" id="copyBtn">Copiar resumo</button>
           </div>
 
+          <div class="left-summary">
+            <div class="breakdown">
+              <table aria-describedby="summaryText">
+                <thead>
+                  <tr>
+                    <th>Tributo</th>
+                    <th>Alíquota</th>
+                    <th>Valor</th>
+                  </tr>
+                </thead>
+                <tbody id="breakdownBody">
+                  <tr>
+                    <td colspan="3" class="muted">Nenhum cálculo realizado.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="hint" id="summaryText">Insira o valor base, defina as alíquotas e execute o cálculo.</p>
+          </div>
+
           <p class="hint">Esta é uma ferramenta de simulação básica. Não substitui o parecer profissional de um
             profissional especializado, apuração contábil ou serve de validação fiscal.</p>
         </div>
@@ -599,26 +620,6 @@
               </div>
             </div>
 
-            <div class="summary-block">
-              <div class="breakdown">
-                <table aria-describedby="summaryText">
-                  <thead>
-                    <tr>
-                      <th>Tributo</th>
-                      <th>Alíquota</th>
-                      <th>Valor</th>
-                    </tr>
-                  </thead>
-                  <tbody id="breakdownBody">
-                    <tr>
-                      <td colspan="3" class="muted">Nenhum cálculo realizado.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <p class="hint" id="summaryText">Insira o valor base, defina as alíquotas e execute o cálculo.</p>
-            </div>
           </div>
         </div>
       </section>
