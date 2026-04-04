@@ -3,8 +3,21 @@
 
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calculadora de Impostos</title>
+  <title>Calculadora de Impostos Online | Simulador Tributário em Tempo Real</title>
+  <meta name="description" content="Calcule impostos online em segundos. Simule valor bruto, valor líquido, carga tributária total e distribuição por tributo com presets rápidos e edição manual de alíquotas." />
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
+  <meta name="author" content="L337 Tools" />
+  <meta name="theme-color" content="#f4f7fb" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:site_name" content="Calculadora de Impostos" />
+  <meta property="og:title" content="Calculadora de Impostos Online | Simulador Tributário" />
+  <meta property="og:description" content="Simule carga tributária, valor bruto, valor líquido e composição por tributo em uma calculadora simples, rápida e configurável." />
+  <meta property="twitter:card" content="summary" />
+  <meta property="twitter:title" content="Calculadora de Impostos Online | Simulador Tributário" />
+  <meta property="twitter:description" content="Ferramenta para simular impostos, composição tributária e impacto percentual sobre qualquer valor informado." />
   <style>
     :root {
       --bg: #f4f7fb;
@@ -21,6 +34,19 @@
       --radius: 18px;
     }
 
+
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     * {
       box-sizing: border-box;
     }
@@ -400,7 +426,6 @@
     .result-grid {
       grid-template-columns: 1fr;
     }
-    }
 
     @media (max-width: 640px) {
       .wrap {
@@ -455,24 +480,31 @@
 </head>
 
 <body>
-  <div class="wrap">
+  <main class="wrap" itemscope itemtype="https://schema.org/WebApplication">
+    <meta itemprop="applicationCategory" content="BusinessApplication" />
+    <meta itemprop="operatingSystem" content="Web" />
+    <meta itemprop="inLanguage" content="pt-BR" />
+    <meta itemprop="name" content="Calculadora de Impostos" />
+    <meta itemprop="description" content="Ferramenta online para simular carga tributária, calcular valor bruto e líquido e visualizar a composição dos tributos." />
+    <div class="wrap">
     <div class="hero">
       <div>
-        <span class="badge">&nbsp; - <a style="font-weight:700 ; font-size: 13pt;">CALCULADORA DE IMPOSTOS</a> -
+        <span class="badge">&nbsp; - <span style="font-weight:700; font-size:13pt;">CALCULADORA DE IMPOSTOS</span> -
           &nbsp;</span>
-        <p><a style="font-weight:600"> Simule impostos em segundos com esta ferramenta prática!</a><br>
-          <a style="font-weight:500">Visualize quanto cada tributo impacta na sua receita e entenda de maneira simples a
-            carga tributária sobre qualquer valor.</a> Com presets prontos e edição simples de alíquotas, esta solução
-          foi pensada para o uso direto no dia a dia de um empresário: interface rápida e clara - feita para apoiar
-          decisões comerciais.<br>
+        <h1 class="sr-only">Calculadora de impostos online para simular carga tributária, valor bruto e valor líquido</h1>
+        <p><strong>Simule impostos em segundos com esta ferramenta prática.</strong><br>
+          <span>Visualize quanto cada tributo impacta na sua receita e entenda de maneira simples a
+            carga tributária sobre qualquer valor.</span> Com presets prontos e edição simples de alíquotas, esta solução
+          foi pensada para o uso direto no dia a dia de um empresário: interface rápida e clara, feita para apoiar
+          decisões comerciais.
         </p>
       </div>
     </div>
 
     <div class="grid">
-      <section class="card">
+      <section class="card" aria-labelledby="configTitle">
         <div class="inner">
-          <h2 class="section-title">Configuração</h2>
+          <h2 class="section-title" id="configTitle">Configuração</h2>
 
           <div class="controls">
             <div class="field">
@@ -524,9 +556,9 @@
         </div>
       </section>
 
-      <section class="card">
+      <section class="card" aria-labelledby="resultTitle">
         <div class="inner">
-          <h2 class="section-title">Resultado</h2>
+          <h2 class="section-title" id="resultTitle">Resultado</h2>
 
           <div class="result-grid">
             <div>
@@ -552,7 +584,7 @@
 
             <div class="chart-card">
               <div class="chart-wrap">
-                <canvas id="donutChart" width="320" height="320" aria-label="Distribuição tributária"></canvas>
+                <canvas id="donutChart" width="320" height="320" role="img" aria-label="Gráfico de rosca com a distribuição tributária calculada"></canvas>
                 <div class="chart-center">
                   <div class="mini">Total dos tributos</div>
                   <strong id="chartCenterValue">R$ 0,00</strong>
@@ -563,7 +595,7 @@
           </div>
 
           <div class="breakdown">
-            <table>
+            <table aria-describedby="summaryText">
               <thead>
                 <tr>
                   <th>Tributo</th>
@@ -584,6 +616,21 @@
       </section>
     </div>
   </div>
+
+  <script>
+    (function () {
+      const canonicalHref = window.location.href.split('#')[0].split('?')[0];
+      const canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      canonical.setAttribute('href', canonicalHref);
+      document.head.appendChild(canonical);
+
+      const ogUrl = document.createElement('meta');
+      ogUrl.setAttribute('property', 'og:url');
+      ogUrl.setAttribute('content', canonicalHref);
+      document.head.appendChild(ogUrl);
+    })();
+  </script>
 
   <script>
     const DIGITS = 2;
@@ -919,5 +966,32 @@
   <a class="counterpagevisit" target="_blank">
     <img src="https://hitwebcounter.com/counter/counter.php?page=21486281&style=0007&nbdigits=8&type=page&initCount=29"
       border="0" />
+  </a>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Calculadora de Impostos",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "inLanguage": "pt-BR",
+    "description": "Ferramenta online para simular impostos, calcular valor bruto e valor líquido e visualizar a distribuição percentual da carga tributária.",
+    "featureList": [
+      "Simulação de valor bruto para líquido",
+      "Simulação de líquido desejado para bruto necessário",
+      "Presets rápidos de tributos",
+      "Edição manual de alíquotas",
+      "Gráfico donut com composição tributária",
+      "Persistência local das configurações"
+    ],
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "BRL"
+    }
+  }
+  </script>
 </body>
 </html>
