@@ -474,14 +474,14 @@
       hub.classList.remove('closing');
       hub.classList.add('active');
       clearTimeout(closeTimer);
-      closeTimer = setTimeout(closeOrbit, 35000);
+      closeTimer = setTimeout(closeOrbit, 999999);
     }
 
     function closeOrbit() {
       hub.classList.add('closing');
       hub.classList.remove('active');
       clearTimeout(closeTimer);
-      setTimeout(() => hub.classList.remove('closing'), 2200);
+      setTimeout(() => hub.classList.remove('closing'), 1600);
     }
 
     coreButton.addEventListener('mouseenter', () => {
