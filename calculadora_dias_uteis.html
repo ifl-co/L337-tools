@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Dias Úteis</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --panel-2: #f8fbff;
+      --text: #162033;
+      --muted: #5f6f86;
+      --line: #dbe5f0;
+      --accent: #2f6fed;
+      --accent-soft: #eaf2ff;
+      --danger: #c94b4b;
+      --ok: #2b8a57;
+      --shadow: 0 18px 50px rgba(17, 24, 39, .08);
+      --radius: 18px;
+      --holiday: #fff3f0;
+      --holiday-line: #ffd8cf;
+      --weekend: #f7f8fb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(47, 111, 237, .08), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(47, 111, 237, .05), transparent 25%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .hero {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(1.9rem, 2.7vw, 3rem);
+      line-height: 1.04;
+      letter-spacing: -0.03em;
+      color: #101828;
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      max-width: 920px;
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.08fr .92fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(231, 237, 245, 0.94));
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card .inner { padding: 22px; }
+
+    .section-title {
+      font-size: .88rem;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: var(--muted);
+      margin: 0 0 22px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1.5px solid var(--line);
+      border-color: rgba(11, 25, 49, 0.811);
+      background: rgba(26, 46, 80, 0.82);
+      color: #f2f7ff;
+      border-radius: 999px;
+      font-size: .84rem;
+      backdrop-filter: blur(4px);
+      padding: 3px 12px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: .92rem;
+      color: var(--muted);
+    }
+
+    input, select, button, textarea { font: inherit; }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .18s ease, transform .08s ease, box-shadow .18s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(47, 111, 237, .10);
+    }
+
+    .segment {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .segment button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: .18s ease;
+      font-weight: 600;
+    }
+
+    .segment button.active {
+      background: linear-gradient(180deg, #f2f7ff, #e7f0ff);
+      border-color: rgba(47, 111, 237, .35);
+      color: #1849a9;
+      box-shadow: 0 6px 18px rgba(47, 111, 237, .08);
+    }
+
+    .inline-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0 4px;
+    }
+
+    .check {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fbfdff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text);
+    }
+
+    .check input {
+      width: auto;
+      padding: 0;
+      box-shadow: none;
+      accent-color: var(--accent);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform .08s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      background: #f7fbff;
+      box-shadow: 0 6px 18px rgba(47, 111, 237, .08);
+    }
+
+    .btn:active { transform: translateY(1px); }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #f2f7ff, #e7f0ff);
+      border-color: rgba(47, 111, 237, .35);
+      color: #1849a9;
+      font-weight: 600;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      background: #fbfdff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .stat small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.35rem;
+      letter-spacing: -.03em;
+      color: #0f1728;
+      line-height: 1.2;
+    }
+
+    .summary-box, .list-box {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .summary-box .head, .list-box .head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fbff;
+      color: var(--muted);
+      font-size: .82rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .summary-box .body, .list-box .body {
+      padding: 16px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.55;
+      margin-top: 12px;
+    }
+
+    .holiday-list {
+      display: grid;
+      gap: 10px;
+      max-height: 460px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .holiday-item {
+      display: grid;
+      grid-template-columns: 120px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fbfdff;
+      padding: 12px;
+    }
+
+    .holiday-item.weekend {
+      background: var(--weekend);
+    }
+
+    .holiday-item.holiday {
+      background: var(--holiday);
+      border-color: var(--holiday-line);
+    }
+
+    .holiday-date {
+      font-weight: 700;
+      color: #0f1728;
+    }
+
+    .holiday-name {
+      color: var(--text);
+    }
+
+    .holiday-tag {
+      font-size: .78rem;
+      border-radius: 999px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255,255,255,.8);
+      white-space: nowrap;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .cal-head, .cal-cell {
+      border-radius: 12px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .cal-head {
+      font-size: .78rem;
+      color: var(--muted);
+      background: #f8fbff;
+      border: 1px solid var(--line);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .cal-cell {
+      min-height: 72px;
+      background: #fbfdff;
+      border: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      justify-content: start;
+      align-items: center;
+      gap: 6px;
+      font-size: .9rem;
+    }
+
+    .cal-cell.muted { opacity: .38; }
+    .cal-cell.weekend { background: var(--weekend); }
+    .cal-cell.holiday { background: var(--holiday); border-color: var(--holiday-line); }
+    .cal-cell.selected { outline: 2px solid rgba(47, 111, 237, .35); }
+
+    .cal-day { font-weight: 700; }
+    .cal-note { font-size: .66rem; line-height: 1.25; color: var(--muted); }
+
+    .error {
+      margin-top: 12px;
+      color: var(--danger);
+      font-size: .92rem;
+      display: none;
+    }
+
+    @media (max-width: 1040px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .wrap { padding: 16px; }
+      .controls, .stats { grid-template-columns: 1fr; }
+      .segment { grid-template-columns: 1fr; }
+      .holiday-item { grid-template-columns: 1fr; }
+      .calendar { gap: 6px; }
+      .cal-cell { min-height: 64px; padding: 8px 4px; }
+      .hero { flex-direction: column; align-items: start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <span class="badge">- <span style="font-weight:700; font-size:13pt;">CALCULADORA DE DIAS ÚTEIS</span> -</span>
+        <p><span style="font-weight:600">Conte dias úteis com precisão, sem tropeçar em fins de semana e feriados nacionais.</span><br>
+        <span style="font-weight:500">A ferramenta calcula intervalos, soma ou subtrai dias úteis e considera automaticamente os feriados nacionais brasileiros fixos e móveis. Foi desenhada para rotina empresarial, contratual, operacional e administrativa, com leitura rápida e resultado limpo.</span></p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <div class="inner">
+          <h2 class="section-title">Configuração</h2>
+
+          <div class="segment">
+            <button type="button" id="modeRange" class="active">Contar entre duas datas</button>
+            <button type="button" id="modeOffset">Somar ou subtrair dias úteis</button>
+          </div>
+
+          <div class="controls">
+            <div class="field">
+              <label for="startDate">Data inicial</label>
+              <input id="startDate" type="date" />
+            </div>
+
+            <div class="field" id="endDateField">
+              <label for="endDate">Data final</label>
+              <input id="endDate" type="date" />
+            </div>
+
+            <div class="field" id="offsetField" style="display:none;">
+              <label for="offsetDays">Quantidade de dias úteis</label>
+              <input id="offsetDays" type="number" step="1" value="10" />
+            </div>
+
+            <div class="field">
+              <label for="previewMonth">Mês de referência visual</label>
+              <input id="previewMonth" type="month" />
+            </div>
+          </div>
+
+          <div class="inline-options">
+            <label class="check"><input id="includeStart" type="checkbox" checked /> Incluir data inicial</label>
+            <label class="check"><input id="includeEnd" type="checkbox" checked /> Incluir data final</label>
+            <label class="check"><input id="countHolidaysAsBusiness" type="checkbox" /> Tratar feriados como úteis</label>
+          </div>
+
+          <div class="toolbar">
+            <button class="btn btn-primary" id="calculateBtn" type="button">Calcular</button>
+            <button class="btn" id="todayBtn" type="button">Hoje</button>
+            <button class="btn" id="resetBtn" type="button">Resetar</button>
+            <button class="btn" id="copyBtn" type="button">Copiar resumo</button>
+          </div>
+
+          <div class="error" id="errorBox"></div>
+
+          <p class="hint">Critério padrão: sábado e domingo não contam como úteis. A ferramenta aplica feriados nacionais brasileiros recorrentes, inclusive Paixão de Cristo, calculada por algoritmo astronômico-eclesiástico para anos futuros.</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="inner">
+          <h2 class="section-title">Resultado</h2>
+
+          <div class="result-grid">
+            <div class="stats">
+              <div class="stat">
+                <small>Período analisado</small>
+                <strong id="periodValue">—</strong>
+              </div>
+              <div class="stat">
+                <small>Dias úteis</small>
+                <strong id="businessDaysValue">0</strong>
+              </div>
+              <div class="stat">
+                <small>Dias não úteis</small>
+                <strong id="nonBusinessDaysValue">0</strong>
+              </div>
+              <div class="stat">
+                <small>Data resultante</small>
+                <strong id="resultDateValue">—</strong>
+              </div>
+            </div>
+
+            <div class="summary-box">
+              <div class="head">Resumo analítico</div>
+              <div class="body" id="summaryText">Defina as datas e execute o cálculo.</div>
+            </div>
+
+            <div class="summary-box">
+              <div class="head">Calendário do mês</div>
+              <div class="body">
+                <div class="calendar" id="calendarGrid"></div>
+              </div>
+            </div>
+
+            <div class="list-box">
+              <div class="head">Datas descartadas no cálculo</div>
+              <div class="body">
+                <div class="holiday-list" id="excludedList">
+                  <div class="hint" style="margin:0;">Nenhum cálculo realizado.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    const state = {
+      mode: 'range',
+      excludedDates: [],
+      calculatedDates: [],
+      resultDate: null,
+      previewYear: null,
+      previewMonth: null
+    };
+
+    const FIXED_HOLIDAYS = [
+      { month: 1, day: 1, name: 'Confraternização Universal' },
+      { month: 4, day: 21, name: 'Tiradentes' },
+      { month: 5, day: 1, name: 'Dia do Trabalhador' },
+      { month: 9, day: 7, name: 'Independência do Brasil' },
+      { month: 10, day: 12, name: 'Nossa Senhora Aparecida' },
+      { month: 11, day: 2, name: 'Finados' },
+      { month: 11, day: 15, name: 'Proclamação da República' },
+      { month: 11, day: 20, name: 'Dia Nacional de Zumbi e da Consciência Negra' },
+      { month: 12, day: 25, name: 'Natal' }
+    ];
+
+    const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+    function pad(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function formatDate(date) {
+      if (!date) return '—';
+      return date.toLocaleDateString('pt-BR', {
+        day: '2-digit', month: '2-digit', year: 'numeric'
+      });
+    }
+
+    function formatDateLong(date) {
+      if (!date) return '—';
+      return date.toLocaleDateString('pt-BR', {
+        weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+      });
+    }
+
+    function toISO(date) {
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
+
+    function parseDate(value) {
+      if (!value) return null;
+      const [y, m, d] = value.split('-').map(Number);
+      return new Date(y, m - 1, d, 12, 0, 0, 0);
+    }
+
+    function cloneDate(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0, 0);
+    }
+
+    function addDays(date, days) {
+      const d = cloneDate(date);
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+
+    function compareDates(a, b) {
+      const aa = new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime();
+      const bb = new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime();
+      return aa - bb;
+    }
+
+    function getEasterSunday(year) {
+      const a = year % 19;
+      const b = Math.floor(year / 100);
+      const c = year % 100;
+      const d = Math.floor(b / 4);
+      const e = b % 4;
+      const f = Math.floor((b + 8) / 25);
+      const g = Math.floor((b - f + 1) / 3);
+      const h = (19 * a + b - d - g + 15) % 30;
+      const i = Math.floor(c / 4);
+      const k = c % 4;
+      const l = (32 + 2 * e + 2 * i - h - k) % 7;
+      const m = Math.floor((a + 11 * h + 22 * l) / 451);
+      const month = Math.floor((h + l - 7 * m + 114) / 31);
+      const day = ((h + l - 7 * m + 114) % 31) + 1;
+      return new Date(year, month - 1, day, 12, 0, 0, 0);
+    }
+
+    function getNationalHolidays(year) {
+      const map = new Map();
+
+      for (const item of FIXED_HOLIDAYS) {
+        const date = new Date(year, item.month - 1, item.day, 12, 0, 0, 0);
+        map.set(toISO(date), { date, name: item.name, type: 'Feriado nacional' });
+      }
+
+      const easter = getEasterSunday(year);
+      const goodFriday = addDays(easter, -2);
+      map.set(toISO(goodFriday), {
+        date: goodFriday,
+        name: 'Paixão de Cristo',
+        type: 'Feriado nacional móvel'
+      });
+
+      return map;
+    }
+
+    const holidayCache = new Map();
+    function getHolidayMapForYear(year) {
+      if (!holidayCache.has(year)) {
+        holidayCache.set(year, getNationalHolidays(year));
+      }
+      return holidayCache.get(year);
+    }
+
+    function getHolidayInfo(date) {
+      return getHolidayMapForYear(date.getFullYear()).get(toISO(date)) || null;
+    }
+
+    function isWeekend(date) {
+      const day = date.getDay();
+      return day === 0 || day === 6;
+    }
+
+    function isBusinessDay(date) {
+      const treatHolidaysAsBusiness = $('countHolidaysAsBusiness').checked;
+      if (isWeekend(date)) return false;
+      if (!treatHolidaysAsBusiness && getHolidayInfo(date)) return false;
+      return true;
+    }
+
+    function collectRangeDates(start, end, includeStart, includeEnd) {
+      const dates = [];
+      let current = cloneDate(start);
+      while (compareDates(current, end) <= 0) {
+        const isStart = compareDates(current, start) === 0;
+        const isEnd = compareDates(current, end) === 0;
+        if ((!isStart || includeStart) && (!isEnd || includeEnd)) {
+          dates.push(cloneDate(current));
+        }
+        current = addDays(current, 1);
+      }
+      return dates;
+    }
+
+    function calculateRange() {
+      const start = parseDate($('startDate').value);
+      const end = parseDate($('endDate').value);
+      const includeStart = $('includeStart').checked;
+      const includeEnd = $('includeEnd').checked;
+
+      if (!start || !end) throw new Error('Informe data inicial e data final.');
+      if (compareDates(start, end) > 0) throw new Error('A data final não pode ser anterior à data inicial.');
+
+      const dates = collectRangeDates(start, end, includeStart, includeEnd);
+      const business = [];
+      const excluded = [];
+
+      for (const date of dates) {
+        const holiday = getHolidayInfo(date);
+        const weekend = isWeekend(date);
+        if (isBusinessDay(date)) {
+          business.push(date);
+        } else {
+          excluded.push({
+            date,
+            weekend,
+            holiday,
+            reason: weekend ? 'Fim de semana' : (holiday ? holiday.name : 'Não útil')
+          });
+        }
+      }
+
+      state.calculatedDates = dates;
+      state.excludedDates = excluded;
+      state.resultDate = end;
+
+      $('periodValue').textContent = `${formatDate(start)} a ${formatDate(end)}`;
+      $('businessDaysValue').textContent = String(business.length);
+      $('nonBusinessDaysValue').textContent = String(excluded.length);
+      $('resultDateValue').textContent = formatDateLong(end);
+
+      $('summaryText').textContent = `No intervalo de ${formatDate(start)} até ${formatDate(end)}, considerando ${includeStart ? 'a inclusão' : 'a exclusão'} da data inicial e ${includeEnd ? 'a inclusão' : 'a exclusão'} da data final, foram encontrados ${business.length} dias úteis e ${excluded.length} datas descartadas.`;
+
+      renderExcludedList();
+      syncPreviewMonth(end);
+      renderCalendar();
+    }
+
+    function calculateOffset() {
+      const start = parseDate($('startDate').value);
+      const offset = Number($('offsetDays').value);
+      const includeStart = $('includeStart').checked;
+
+      if (!start) throw new Error('Informe a data inicial.');
+      if (!Number.isInteger(offset)) throw new Error('A quantidade de dias úteis deve ser inteira.');
+
+      const direction = offset >= 0 ? 1 : -1;
+      let remaining = Math.abs(offset);
+      let cursor = cloneDate(start);
+      const excluded = [];
+      const accepted = [];
+
+      if (includeStart) {
+        if (isBusinessDay(cursor)) {
+          accepted.push(cloneDate(cursor));
+          if (remaining > 0) remaining -= 1;
+        } else {
+          excluded.push({
+            date: cloneDate(cursor),
+            weekend: isWeekend(cursor),
+            holiday: getHolidayInfo(cursor),
+            reason: isWeekend(cursor) ? 'Fim de semana' : (getHolidayInfo(cursor)?.name || 'Não útil')
+          });
+        }
+      }
+
+      while (remaining > 0) {
+        cursor = addDays(cursor, direction);
+        const holiday = getHolidayInfo(cursor);
+        const weekend = isWeekend(cursor);
+        if (isBusinessDay(cursor)) {
+          accepted.push(cloneDate(cursor));
+          remaining -= 1;
+        } else {
+          excluded.push({
+            date: cloneDate(cursor),
+            weekend,
+            holiday,
+            reason: weekend ? 'Fim de semana' : (holiday ? holiday.name : 'Não útil')
+          });
+        }
+      }
+
+      state.calculatedDates = accepted;
+      state.excludedDates = excluded;
+      state.resultDate = cloneDate(cursor);
+
+      $('periodValue').textContent = `${formatDate(start)} ${offset >= 0 ? '+' : '−'} ${Math.abs(offset)} útil(eis)`;
+      $('businessDaysValue').textContent = String(accepted.length);
+      $('nonBusinessDaysValue').textContent = String(excluded.length);
+      $('resultDateValue').textContent = formatDateLong(cursor);
+
+      $('summaryText').textContent = `Partindo de ${formatDate(start)}, o deslocamento de ${Math.abs(offset)} dia(s) útil(eis) ${offset >= 0 ? 'à frente' : 'para trás'} resultou em ${formatDate(cursor)}. No percurso, ${excluded.length} data(s) foram ignoradas por não serem úteis.`;
+
+      renderExcludedList();
+      syncPreviewMonth(cursor);
+      renderCalendar();
+    }
+
+    function renderExcludedList() {
+      const box = $('excludedList');
+      if (!state.excludedDates.length) {
+        box.innerHTML = '<div class="hint" style="margin:0;">Nenhuma data foi descartada neste cálculo.</div>';
+        return;
+      }
+
+      box.innerHTML = state.excludedDates.map((item) => {
+        const tag = item.holiday ? 'Feriado' : 'Fim de semana';
+        const cls = item.holiday ? 'holiday' : 'weekend';
+        return `
+          <div class="holiday-item ${cls}">
+            <div class="holiday-date">${formatDate(item.date)}</div>
+            <div class="holiday-name">${item.reason}</div>
+            <div class="holiday-tag">${tag}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function syncPreviewMonth(date) {
+      const ref = date || parseDate($('startDate').value) || new Date();
+      state.previewYear = ref.getFullYear();
+      state.previewMonth = ref.getMonth();
+      $('previewMonth').value = `${ref.getFullYear()}-${pad(ref.getMonth() + 1)}`;
+    }
+
+    function renderCalendar() {
+      const grid = $('calendarGrid');
+      const year = state.previewYear ?? new Date().getFullYear();
+      const month = state.previewMonth ?? new Date().getMonth();
+      const first = new Date(year, month, 1, 12, 0, 0, 0);
+      const startWeekday = first.getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const prevDays = new Date(year, month, 0).getDate();
+      const selectedISO = new Set((state.calculatedDates || []).map(toISO));
+      const resultISO = state.resultDate ? toISO(state.resultDate) : null;
+
+      let html = WEEKDAYS.map(day => `<div class="cal-head">${day}</div>`).join('');
+
+      for (let i = startWeekday - 1; i >= 0; i--) {
+        html += `<div class="cal-cell muted"><div class="cal-day">${prevDays - i}</div></div>`;
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day, 12, 0, 0, 0);
+        const holiday = getHolidayInfo(date);
+        const weekend = isWeekend(date);
+        const classes = ['cal-cell'];
+        if (weekend) classes.push('weekend');
+        if (holiday) classes.push('holiday');
+        if (selectedISO.has(toISO(date)) || resultISO === toISO(date)) classes.push('selected');
+        html += `
+          <div class="${classes.join(' ')}">
+            <div class="cal-day">${day}</div>
+            <div class="cal-note">${holiday ? 'Feriado' : weekend ? 'Descanso' : 'Útil'}</div>
+          </div>
+        `;
+      }
+
+      const totalCells = startWeekday + daysInMonth;
+      const trailing = (7 - (totalCells % 7)) % 7;
+      for (let i = 1; i <= trailing; i++) {
+        html += `<div class="cal-cell muted"><div class="cal-day">${i}</div></div>`;
+      }
+
+      grid.innerHTML = html;
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      $('modeRange').classList.toggle('active', mode === 'range');
+      $('modeOffset').classList.toggle('active', mode === 'offset');
+      $('endDateField').style.display = mode === 'range' ? '' : 'none';
+      $('offsetField').style.display = mode === 'offset' ? '' : 'none';
+      $('includeEnd').parentElement.style.display = mode === 'range' ? 'inline-flex' : 'none';
+      $('resultDateValue').textContent = '—';
+    }
+
+    function calculate() {
+      $('errorBox').style.display = 'none';
+      try {
+        if (state.mode === 'range') {
+          calculateRange();
+        } else {
+          calculateOffset();
+        }
+      } catch (error) {
+        $('errorBox').textContent = error.message || 'Não foi possível calcular.';
+        $('errorBox').style.display = 'block';
+      }
+    }
+
+    async function copySummary() {
+      const lines = [
+        `Modo: ${state.mode === 'range' ? 'Contar entre duas datas' : 'Somar ou subtrair dias úteis'}`,
+        `Período: ${$('periodValue').textContent}`,
+        `Dias úteis: ${$('businessDaysValue').textContent}`,
+        `Dias não úteis: ${$('nonBusinessDaysValue').textContent}`,
+        `Data resultante: ${$('resultDateValue').textContent}`,
+        `Resumo: ${$('summaryText').textContent}`
+      ];
+
+      try {
+        await navigator.clipboard.writeText(lines.join('\n'));
+        const btn = $('copyBtn');
+        const original = btn.textContent;
+        btn.textContent = 'Resumo copiado';
+        setTimeout(() => btn.textContent = original, 1400);
+      } catch {
+        alert('Não foi possível copiar automaticamente.');
+      }
+    }
+
+    function resetForm() {
+      const today = new Date();
+      const nextWeek = addDays(today, 10);
+      $('startDate').value = toISO(today);
+      $('endDate').value = toISO(nextWeek);
+      $('offsetDays').value = '10';
+      $('includeStart').checked = true;
+      $('includeEnd').checked = true;
+      $('countHolidaysAsBusiness').checked = false;
+      $('summaryText').textContent = 'Defina as datas e execute o cálculo.';
+      $('periodValue').textContent = '—';
+      $('businessDaysValue').textContent = '0';
+      $('nonBusinessDaysValue').textContent = '0';
+      $('resultDateValue').textContent = '—';
+      $('excludedList').innerHTML = '<div class="hint" style="margin:0;">Nenhum cálculo realizado.</div>';
+      syncPreviewMonth(today);
+      renderCalendar();
+      $('errorBox').style.display = 'none';
+    }
+
+    $('modeRange').addEventListener('click', () => setMode('range'));
+    $('modeOffset').addEventListener('click', () => setMode('offset'));
+    $('calculateBtn').addEventListener('click', calculate);
+    $('copyBtn').addEventListener('click', copySummary);
+    $('resetBtn').addEventListener('click', resetForm);
+    $('todayBtn').addEventListener('click', () => {
+      const today = new Date();
+      $('startDate').value = toISO(today);
+      if (state.mode === 'range') $('endDate').value = toISO(today);
+      syncPreviewMonth(today);
+      renderCalendar();
+    });
+    $('previewMonth').addEventListener('change', (e) => {
+      if (!e.target.value) return;
+      const [year, month] = e.target.value.split('-').map(Number);
+      state.previewYear = year;
+      state.previewMonth = month - 1;
+      renderCalendar();
+    });
+
+    resetForm();
+  </script>
+</body>
+</html>
