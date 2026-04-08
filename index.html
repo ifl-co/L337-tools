@@ -352,7 +352,7 @@
   <main>
     <section class="hub" id="hub" aria-label="L337 Tools hub">
       <div class="orbit-layer" aria-hidden="false">
-        <div class="tool-orbit" style="--orbit-radius: 225px; --orbit-speed: 11.4s; --orbit-angle: 5deg;">
+        <div class="tool-orbit" style="--orbit-radius: 225px; --orbit-speed: 13.4s; --orbit-angle: 5deg;">
           <div class="tool-link-wrap">
             <a class="tool-link" href="calculadora_impostos.html">
               <span class="tool-label">
@@ -363,7 +363,7 @@
           </div>
         </div>
 
-        <div class="tool-orbit" style="--orbit-radius: 311px; --orbit-speed: 13.75s; --orbit-angle: 21deg;">
+        <div class="tool-orbit" style="--orbit-radius: 311px; --orbit-speed: 17.75s; --orbit-angle: 7deg;">
           <div class="tool-link-wrap">
             <a class="tool-link" href="calculadora_dias_uteis.html">
               <span class="tool-label">
@@ -375,7 +375,7 @@
         </div>
 
 
-        <div class="tool-orbit" style="--orbit-radius: 399px; --orbit-speed: 6s; --orbit-angle: 184deg;">
+        <div class="tool-orbit" style="--orbit-radius: 399px; --orbit-speed: 26s; --orbit-angle: 12deg;">
           <div class="tool-link-wrap">
             <a class="tool-link" href="#">
               <span class="tool-label">
@@ -474,14 +474,14 @@
       hub.classList.remove('closing');
       hub.classList.add('active');
       clearTimeout(closeTimer);
-      closeTimer = setTimeout(closeOrbit, 17000);
+      closeTimer = setTimeout(closeOrbit, 35000);
     }
 
     function closeOrbit() {
       hub.classList.add('closing');
       hub.classList.remove('active');
       clearTimeout(closeTimer);
-      setTimeout(() => hub.classList.remove('closing'), 1200);
+      setTimeout(() => hub.classList.remove('closing'), 2200);
     }
 
     coreButton.addEventListener('mouseenter', () => {
