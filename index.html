@@ -13,10 +13,7 @@
       --line: rgba(255,255,255,.18);
       --line-strong: rgba(255,255,255,.75);
       --panel: rgba(255,255,255,.055);
-      --glow: rgba(255,255,255,.12);
       --btn-size: 118px;
-      --orbit-radius: 150px;
-      --orbit-speed: 26s;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -71,7 +68,7 @@
 
     .hub {
       position: relative;
-      width: min(72vw, 620px);
+      width: min(76vw, 700px);
       aspect-ratio: 1;
       display: grid;
       place-items: center;
@@ -96,8 +93,8 @@
     }
 
     .hub::after {
-      width: 320px;
-      height: 320px;
+      width: 360px;
+      height: 360px;
       border: 1px dashed rgba(255,255,255,.05);
     }
 
@@ -107,7 +104,7 @@
       width: var(--btn-size);
       height: var(--btn-size);
       transform: translate(-50%, -50%);
-      z-index: 4;
+      z-index: 8;
     }
 
     .core {
@@ -185,12 +182,18 @@
     }
 
     .tool-orbit {
+      --orbit-radius: 180px;
+      --orbit-speed: 26s;
+      --orbit-delay: 0s;
+      --orbit-angle: 0deg;
       position: absolute;
       left: 0;
       top: 0;
       width: 0;
       height: 0;
+      transform: rotate(var(--orbit-angle));
       animation: orbit-spin var(--orbit-speed) linear infinite;
+      animation-delay: var(--orbit-delay);
       animation-play-state: paused;
     }
 
@@ -198,13 +201,20 @@
       animation-play-state: running;
     }
 
-    .tool-link {
-      --size: 152px;
+    .tool-link-wrap {
       position: absolute;
-      left: calc(var(--orbit-radius) * -1);
+      left: 0;
+      top: 0;
+      transform: translateX(calc(var(--orbit-radius) * -1));
+    }
+
+    .tool-link {
+      --size: 164px;
+      position: absolute;
+      left: calc(var(--size) / -2);
       top: calc(var(--size) / -2);
       width: var(--size);
-      min-height: 54px;
+      min-height: 62px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -217,7 +227,7 @@
       border: 1px solid var(--line);
       box-shadow: 0 10px 30px rgba(0,0,0,.2), 0 0 0 1px rgba(255,255,255,.02) inset;
       backdrop-filter: blur(8px);
-      transform: translate(0, 0) scale(.2);
+      transform: scale(.2);
       opacity: 0;
       filter: blur(8px);
       pointer-events: none;
@@ -229,6 +239,24 @@
         border-color .35s ease,
         box-shadow .35s ease,
         background .35s ease;
+      animation: orbit-counter-spin var(--orbit-speed) linear infinite;
+      animation-delay: var(--orbit-delay);
+      animation-play-state: paused;
+    }
+
+    .hub.active .tool-link {
+      opacity: 1;
+      filter: blur(0);
+      pointer-events: auto;
+      transform: scale(1);
+      animation-play-state: running;
+    }
+
+    .hub.closing .tool-link {
+      opacity: 0;
+      filter: blur(8px);
+      pointer-events: none;
+      transform: scale(.2);
     }
 
     .tool-link::before {
@@ -241,20 +269,6 @@
       flex: 0 0 auto;
     }
 
-    .hub.active .tool-link {
-      opacity: 1;
-      filter: blur(0);
-      pointer-events: auto;
-      transform: translate(calc(var(--orbit-radius) * -1), 0) scale(1);
-    }
-
-    .hub.closing .tool-link {
-      opacity: 0;
-      filter: blur(8px);
-      pointer-events: none;
-      transform: translate(0, 0) scale(.2);
-    }
-
     .tool-link:hover {
       border-color: rgba(255,255,255,.5);
       background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
@@ -264,21 +278,17 @@
     .tool-label {
       display: flex;
       flex-direction: column;
-      line-height: 1.05;
+      align-items: flex-start;
+      gap: 2px;
+      line-height: 1;
     }
 
-    .tool-label strong {
-      font-size: .92rem;
+    .tool-label .line {
+      font-size: .75rem;
       font-weight: 600;
-      letter-spacing: .01em;
-    }
-
-    .tool-label span {
-      font-size: .66rem;
-      color: var(--muted);
-      letter-spacing: .14em;
+      letter-spacing: .11em;
       text-transform: uppercase;
-      margin-top: 5px;
+      color: var(--text);
     }
 
     .helper {
@@ -296,23 +306,36 @@
     }
 
     @keyframes orbit-spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+      from { transform: rotate(var(--orbit-angle)); }
+      to { transform: rotate(calc(var(--orbit-angle) + 360deg)); }
+    }
+
+    @keyframes orbit-counter-spin {
+      from { transform: rotate(calc(var(--orbit-angle) * -1)) scale(1); }
+      to { transform: rotate(calc((var(--orbit-angle) + 360deg) * -1)) scale(1); }
     }
 
     @media (max-width: 700px) {
       :root {
         --btn-size: 104px;
-        --orbit-radius: 158px;
-      }
-
-      .tool-link {
-        --size: 136px;
       }
 
       .hub::after {
-        width: 260px;
-        height: 260px;
+        width: 280px;
+        height: 280px;
+      }
+
+      .tool-link {
+        --size: 142px;
+        min-height: 58px;
+        padding: 12px 14px;
+      }
+
+      .tool-orbit { --orbit-radius: 152px; }
+
+      .tool-label .line {
+        font-size: .66rem;
+        letter-spacing: .09em;
       }
 
       .helper {
@@ -329,15 +352,94 @@
   <main>
     <section class="hub" id="hub" aria-label="L337 Tools hub">
       <div class="orbit-layer" aria-hidden="false">
-        <div class="tool-orbit">
-          <a class="tool-link" href="calculadora_impostos.html">
-            <span class="tool-label">
-              <strong>Calculadora</strong>
-              <span>de Impostos</span>
-            </span>
-          </a>
+        <div class="tool-orbit" style="--orbit-radius: 172px; --orbit-speed: 30s; --orbit-angle: 22deg;">
+          <div class="tool-link-wrap">
+            <a class="tool-link" href="calculadora_impostos.html">
+              <span class="tool-label">
+                <span class="line">Calculadora</span>
+                <span class="line">de Impostos</span>
+              </span>
+            </a>
+          </div>
         </div>
+
+        <div class="tool-orbit" style="--orbit-radius: 232px; --orbit-speed: 43s; --orbit-angle: 210deg;">
+          <div class="tool-link-wrap">
+            <a class="tool-link" href="calculadora_dias_uteis.html">
+              <span class="tool-label">
+                <span class="line">Calculadora</span>
+                <span class="line">de Dias Úteis</span>
+              </span>
+            </a>
+          </div>
+        </div>
+
+        <!--
+        <div class="tool-orbit" style="--orbit-radius: 196px; --orbit-speed: 35s; --orbit-angle: 84deg;">
+          <div class="tool-link-wrap">
+            <a class="tool-link" href="#">
+              <span class="tool-label">
+                <span class="line">Nova</span>
+                <span class="line">Ferramenta 01</span>
+              </span>
+            </a>
+          </div>
+        </div>
+        -->
+
+        <!--
+        <div class="tool-orbit" style="--orbit-radius: 258px; --orbit-speed: 49s; --orbit-angle: 312deg;">
+          <div class="tool-link-wrap">
+            <a class="tool-link" href="#">
+              <span class="tool-label">
+                <span class="line">Nova</span>
+                <span class="line">Ferramenta 02</span>
+              </span>
+            </a>
+          </div>
+        </div>
+        -->
+
+        <!--
+        <div class="tool-orbit" style="--orbit-radius: 214px; --orbit-speed: 39s; --orbit-angle: 142deg;">
+          <div class="tool-link-wrap">
+            <a class="tool-link" href="#">
+              <span class="tool-label">
+                <span class="line">Nova</span>
+                <span class="line">Ferramenta 03</span>
+              </span>
+            </a>
+          </div>
+        </div>
+        -->
+
+        <!--
+        <div class="tool-orbit" style="--orbit-radius: 286px; --orbit-speed: 58s; --orbit-angle: 18deg;">
+          <div class="tool-link-wrap">
+            <a class="tool-link" href="#">
+              <span class="tool-label">
+                <span class="line">Nova</span>
+                <span class="line">Ferramenta 04</span>
+              </span>
+            </a>
+          </div>
+        </div>
+        -->
+
+        <!--
+        <div class="tool-orbit" style="--orbit-radius: 244px; --orbit-speed: 46s; --orbit-angle: 268deg;">
+          <div class="tool-link-wrap">
+            <a class="tool-link" href="#">
+              <span class="tool-label">
+                <span class="line">Nova</span>
+                <span class="line">Ferramenta 05</span>
+              </span>
+            </a>
+          </div>
+        </div>
+        -->
       </div>
+
       <div class="core-wrap">
         <button class="core" id="coreButton" type="button" aria-label="L337">L337</button>
       </div>
